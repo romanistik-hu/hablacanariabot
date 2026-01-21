@@ -1,0 +1,213 @@
+# forms.py
+
+from telegram.ext import ConversationHandler
+from pymongo import MongoClient
+from urllib.parse import quote_plus
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+username = quote_plus(os.getenv('MONGO_USER'))
+password = quote_plus(os.getenv('MONGO_PASSWORD'))
+host = os.getenv('MONGO_HOST', 'localhost')
+port = os.getenv('MONGO_PORT', '27017')
+db_name = os.getenv('MONGO_DB', 'tele_db')
+
+client = MongoClient(f'mongodb://{username}:{password}@{host}:{port}/')
+db = client[db_name]
+
+participantes_collection = db['participante_individual']
+tareas_collection = db['tareas']
+respuestas_collection = db['respuestas']
+participantes_pareja_collection = db['participantes_pareja']
+consentimientos_collection = db['consentimientos']
+preguntas_seleccion_multiple_collection = db['preguntas_seleccion_multiple']
+preguntas_abiertas_collection = db['preguntas_abiertas']
+textos_consentimientos_collection = db['textos_consentimientos']
+
+# State constants
+TIPO_TAREA = 0
+CONSENTIMIENTO_INDIVIDUAL = 1
+CONSENTIMIENTO_GRUPAL = 2
+
+# Individual registration states
+PAPEL_INDIVIDUAL = 3
+OTRO_PAPEL_INDIVIDUAL = 4
+EMAIL_INDIVIDUAL = 5
+NOMBRE_INDIVIDUAL = 6
+ANIO_NACIMIENTO_INDIVIDUAL = 7
+GENERO_INDIVIDUAL = 8
+NIVEL_EDUCATIVO_INDIVIDUAL = 9
+OTRO_NIVEL_EDUCATIVO_INDIVIDUAL = 10
+GRADO_ANIO_INDIVIDUAL = 11
+GRADO_TIPO_INDIVIDUAL = 11.1
+UNIVERSIDAD_INDIVIDUAL_SELECTION = 12
+OTRO_UNIVERSIDAD_INDIVIDUAL = 13
+PAIS_NACIMIENTO_INDIVIDUAL = 14
+PAIS_NACIMIENTO_INDIVIDUAL_SELECTION = 15
+PAIS_NACIMIENTO_INDIVIDUAL_INPUT = 16
+PROVINCIA_NACIMIENTO_INDIVIDUAL = 17
+PROVINCIA_NACIMIENTO_INDIVIDUAL_SELECTION = 18
+PROVINCIA_NACIMIENTO_INDIVIDUAL_INPUT = 19
+MUNICIPIO_NACIMIENTO_INDIVIDUAL_INPUT = 20
+PAIS_CRIANZA_INDIVIDUAL = 21
+PAIS_CRIANZA_INDIVIDUAL_SELECTION = 22
+PAIS_CRIANZA_INDIVIDUAL_INPUT = 23
+PROVINCIA_CRIANZA_INDIVIDUAL = 24
+PROVINCIA_CRIANZA_INDIVIDUAL_SELECTION = 25
+PROVINCIA_CRIANZA_INDIVIDUAL_INPUT = 26
+MUNICIPIO_CRIANZA_INDIVIDUAL_INPUT = 27
+PAIS_RESIDENCIA_INDIVIDUAL = 28
+PAIS_RESIDENCIA_INDIVIDUAL_SELECTION = 29
+PAIS_RESIDENCIA_INDIVIDUAL_INPUT = 30
+PROVINCIA_RESIDENCIA_INDIVIDUAL = 31
+PROVINCIA_RESIDENCIA_INDIVIDUAL_SELECTION = 32
+PROVINCIA_RESIDENCIA_INDIVIDUAL_INPUT = 33
+MUNICIPIO_RESIDENCIA_INDIVIDUAL_INPUT = 34
+TIEMPO_RESIDENCIA_INDIVIDUAL = 35
+
+# Group registration states (Participant 1)
+PAPEL_PARTICIPANTE_1 = 36
+OTRO_PAPEL_PARTICIPANTE_1 = 37
+EMAIL_PARTICIPANTE_1 = 38
+NOMBRE_PARTICIPANTE_1 = 39
+ANIO_NACIMIENTO_PARTICIPANTE_1 = 40
+GENERO_PARTICIPANTE_1 = 41
+NIVEL_EDUCATIVO_PARTICIPANTE_1 = 42
+OTRO_NIVEL_EDUCATIVO_PARTICIPANTE_1 = 43
+GRADO_ANIO_PARTICIPANTE_1 = 44
+GRADO_TIPO_PARTICIPANTE_1 = 44.1
+UNIVERSIDAD_PARTICIPANTE_1_SELECTION = 45
+OTRO_UNIVERSIDAD_PARTICIPANTE_1 = 46
+PAIS_NACIMIENTO_PARTICIPANTE_1 = 47
+PAIS_NACIMIENTO_PARTICIPANTE_1_SELECTION = 48
+PAIS_NACIMIENTO_PARTICIPANTE_1_INPUT = 49
+PROVINCIA_NACIMIENTO_PARTICIPANTE_1 = 50
+PROVINCIA_NACIMIENTO_PARTICIPANTE_1_SELECTION = 51
+PROVINCIA_NACIMIENTO_PARTICIPANTE_1_INPUT = 52
+MUNICIPIO_NACIMIENTO_PARTICIPANTE_1_INPUT = 53
+PAIS_CRIANZA_PARTICIPANTE_1 = 54
+PAIS_CRIANZA_PARTICIPANTE_1_SELECTION = 55
+PAIS_CRIANZA_PARTICIPANTE_1_INPUT = 56
+PROVINCIA_CRIANZA_PARTICIPANTE_1 = 57
+PROVINCIA_CRIANZA_PARTICIPANTE_1_SELECTION = 58
+PROVINCIA_CRIANZA_PARTICIPANTE_1_INPUT = 59
+MUNICIPIO_CRIANZA_PARTICIPANTE_1_INPUT = 60
+PAIS_RESIDENCIA_PARTICIPANTE_1 = 61
+PAIS_RESIDENCIA_PARTICIPANTE_1_SELECTION = 62
+PAIS_RESIDENCIA_PARTICIPANTE_1_INPUT = 63
+PROVINCIA_RESIDENCIA_PARTICIPANTE_1 = 64
+PROVINCIA_RESIDENCIA_PARTICIPANTE_1_SELECTION = 65
+PROVINCIA_RESIDENCIA_PARTICIPANTE_1_INPUT = 66
+MUNICIPIO_RESIDENCIA_PARTICIPANTE_1_INPUT = 67
+TIEMPO_RESIDENCIA_PARTICIPANTE_1 = 68
+
+# Group registration states (Participant 2)
+PAPEL_PARTICIPANTE_2 = 69
+OTRO_PAPEL_PARTICIPANTE_2 = 70
+EMAIL_PARTICIPANTE_2 = 71
+NOMBRE_PARTICIPANTE_2 = 72
+ANIO_NACIMIENTO_PARTICIPANTE_2 = 73
+GENERO_PARTICIPANTE_2 = 74
+NIVEL_EDUCATIVO_PARTICIPANTE_2 = 75
+OTRO_NIVEL_EDUCATIVO_PARTICIPANTE_2 = 76
+GRADO_ANIO_PARTICIPANTE_2 = 77
+GRADO_TIPO_PARTICIPANTE_2 = 77.1
+UNIVERSIDAD_PARTICIPANTE_2_SELECTION = 78
+OTRO_UNIVERSIDAD_PARTICIPANTE_2 = 79
+PAIS_NACIMIENTO_PARTICIPANTE_2 = 80
+PAIS_NACIMIENTO_PARTICIPANTE_2_SELECTION = 81
+PAIS_NACIMIENTO_PARTICIPANTE_2_INPUT = 82
+PROVINCIA_NACIMIENTO_PARTICIPANTE_2 = 83
+PROVINCIA_NACIMIENTO_PARTICIPANTE_2_SELECTION = 84
+PROVINCIA_NACIMIENTO_PARTICIPANTE_2_INPUT = 85
+MUNICIPIO_NACIMIENTO_PARTICIPANTE_2_INPUT = 86
+PAIS_CRIANZA_PARTICIPANTE_2 = 87
+PAIS_CRIANZA_PARTICIPANTE_2_SELECTION = 88
+PAIS_CRIANZA_PARTICIPANTE_2_INPUT = 89
+PROVINCIA_CRIANZA_PARTICIPANTE_2 = 90
+PROVINCIA_CRIANZA_PARTICIPANTE_2_SELECTION = 91
+PROVINCIA_CRIANZA_PARTICIPANTE_2_INPUT = 92
+MUNICIPIO_CRIANZA_PARTICIPANTE_2_INPUT = 93
+PAIS_RESIDENCIA_PARTICIPANTE_2 = 94
+PAIS_RESIDENCIA_PARTICIPANTE_2_SELECTION = 95
+PAIS_RESIDENCIA_PARTICIPANTE_2_INPUT = 96
+PROVINCIA_RESIDENCIA_PARTICIPANTE_2 = 97
+PROVINCIA_RESIDENCIA_PARTICIPANTE_2_SELECTION = 98
+PROVINCIA_RESIDENCIA_PARTICIPANTE_2_INPUT = 99
+MUNICIPIO_RESIDENCIA_PARTICIPANTE_2_INPUT = 100
+TIEMPO_RESIDENCIA_PARTICIPANTE_2 = 101
+
+# Question states
+PREGUNTAS_INDIVIDUAL = 102
+PREGUNTAS_GRUPAL = 103
+
+# Fallback
+END = ConversationHandler.END
+
+# Configuración centralizada para manejo de ubicaciones geográficas
+LOCATION_CONTEXTS = {
+    'nacimiento': {
+        'states': {
+            'country_selection': PAIS_NACIMIENTO_INDIVIDUAL_SELECTION,
+            'country_input': PAIS_NACIMIENTO_INDIVIDUAL_INPUT,
+            'province_selection': PROVINCIA_NACIMIENTO_INDIVIDUAL_SELECTION,
+            'province_input': PROVINCIA_NACIMIENTO_INDIVIDUAL_INPUT,
+            'municipio_input': MUNICIPIO_NACIMIENTO_INDIVIDUAL_INPUT
+        },
+        'data_keys': {
+            'country': 'pais_nacimiento',
+            'province': 'provincia_nacimiento',
+            'municipio': 'municipio_nacimiento'
+        },
+        'messages': {
+            'country_question': '\U0001F30D ¿En qué país naciste?',
+            'province_question': '\U0001F4CD ¿En qué provincia naciste?',
+            'municipio_question': '\U0001F3E0 ¿En qué municipio naciste?'
+        },
+        'next_flow': 'crianza'
+    },
+    'crianza': {
+        'states': {
+            'country_selection': PAIS_CRIANZA_INDIVIDUAL_SELECTION,
+            'country_input': PAIS_CRIANZA_INDIVIDUAL_INPUT,
+            'province_selection': PROVINCIA_CRIANZA_INDIVIDUAL_SELECTION,
+            'province_input': PROVINCIA_CRIANZA_INDIVIDUAL_INPUT,
+            'municipio_input': MUNICIPIO_CRIANZA_INDIVIDUAL_INPUT
+        },
+        'data_keys': {
+            'country': 'pais_crianza',
+            'province': 'provincia_crianza',
+            'municipio': 'municipio_crianza'
+        },
+        'messages': {
+            'country_question': '\U0001F30E ¿En qué país creciste?',
+            'province_question': '\U0001F4CD ¿En qué provincia creciste?',
+            'municipio_question': '\U0001F3E1 ¿En qué municipio creciste?'
+        },
+        'next_flow': 'residencia'
+    },
+    'residencia': {
+        'states': {
+            'country_selection': PAIS_RESIDENCIA_INDIVIDUAL_SELECTION,
+            'country_input': PAIS_RESIDENCIA_INDIVIDUAL_INPUT,
+            'province_selection': PROVINCIA_RESIDENCIA_INDIVIDUAL_SELECTION,
+            'province_input': PROVINCIA_RESIDENCIA_INDIVIDUAL_INPUT,
+            'municipio_input': MUNICIPIO_RESIDENCIA_INDIVIDUAL_INPUT
+        },
+        'data_keys': {
+            'country': 'pais_residencia',
+            'province': 'provincia_residencia',
+            'municipio': 'municipio_residencia'
+        },
+        'messages': {
+            'country_question': '\U0001F30F ¿En qué país vives actualmente?',
+            'province_question': '\U0001F4CD ¿En qué provincia vives actualmente?',
+            'municipio_question': '\U0001F3E1 ¿En qué municipio vives actualmente?'
+        },
+        'next_flow': 'tiempo_residencia'
+    }
+}
+
