@@ -1,6 +1,6 @@
 # HablaCanariaBot
 
-This bot was developed by Dr. Johnatan E. Bonilla as part of project A09 "On the interplay between register and socio-geographic variation in Canarian Spanish" within the Collaborative Research Centre 1412 "REGISTER" (Register: Language Users' Knowledge of Situational-Functional Variation), led by Prof. Dr. Miriam Bouzouita at Humboldt-Universität zu Berlin.
+This bot was developed by XXXXXXXX as part of project XXXXXXXX  within the XXXXXXXX , led by XXXXXXXX at XXXXXXXX.
 
 Telegram bot for the "Habla Canaria" project, developed in Python. This bot manages data collection from individual and group participants, interacting with a MongoDB database.
 
