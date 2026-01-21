@@ -1,72 +1,76 @@
 # HablaCanariaBot
 
-Bot de Telegram para el proyecto "Habla Canaria", desarrollado en Python. Este bot gestiona la recolección de datos de participantes individuales y grupales, interactuando con una base de datos MongoDB.
+This bot was developed by Dr. Johnatan E. Bonilla as part of project A09 "On the interplay between register and socio-geographic variation in Canarian Spanish" within the Collaborative Research Centre 1412 "REGISTER" (Register: Language Users' Knowledge of Situational-Functional Variation), led by Prof. Dr. Miriam Bouzouita at Humboldt-Universität zu Berlin.
 
-## Requisitos Previos
+Telegram bot for the "Habla Canaria" project, developed in Python. This bot manages data collection from individual and group participants, interacting with a MongoDB database.
+
+## Prerequisites
 
 - **Python 3.8+**
-- **MongoDB** (Local o en clúster)
-- **Token de Bot de Telegram** (Obtenido via @BotFather)
+- **MongoDB** (Local or Cluster)
+- **Telegram Bot Token** (Obtained via @BotFather)
 
-## Instalación
+## Installation
 
-1.  Clonar el repositorio:
+1.  Clone the repository:
     ```bash
-    git clone https://github.com/johnatanebonilla/hablacanariabot.git
+    git clone https://github.com/romanistik-hu/hablacanariabot.git
     cd hablacanariabot
     ```
 
-2.  (Opcional pero recomendado) Crear un entorno virtual:
+2.  (Optional but recommended) Create a virtual environment:
     ```bash
     python -m venv venv
-    # En Windows:
+    # On Windows:
     .\venv\Scripts\activate
-    # En Linux/Mac:
+    # On Linux/Mac:
     source venv/bin/activate
     ```
 
-3.  Instalar las dependencias:
+3.  Install dependencies:
     ```bash
     pip install -r requirements.txt
     ```
 
-## Configuración
+## Configuration
 
-1.  Copiar el archivo de ejemplo de variables de entorno:
+1.  Copy the example environment variables file:
     ```bash
     cp .env.example .env
-    # O en Windows:
+    # Or on Windows:
     copy .env.example .env
     ```
 
-2.  Editar el archivo `.env` con tus credenciales:
+2.  Edit the `.env` file with your credentials:
     ```ini
-    TELEGRAM_TOKEN=tu_token_de_telegram
-    MONGO_USER=tu_usuario_mongo
-    MONGO_PASSWORD=tu_contraseña_mongo
+    TELEGRAM_TOKEN=your_telegram_token
+    MONGO_USER=your_mongo_user
+    MONGO_PASSWORD=your_mongo_password
     MONGO_HOST=localhost
     MONGO_PORT=27017
     MONGO_DB=tele_db
     ```
 
-## Base de Datos (MongoDB)
+## Database (MongoDB)
 
-El bot utiliza una base de datos MongoDB llamada por defecto `tele_db`.
-Si estás usando MongoDB localmente, asegúrate de tener creado el usuario con permisos de lectura y escritura sobre la base de datos `tele_db`, o utiliza un usuario administrador.
+The bot uses a MongoDB database named `tele_db` by default.
+If you are using MongoDB locally, make sure you have created the user with read/write permissions on the `tele_db` database, or use an administrator user.
 
-El script `forms.py` gestiona la conexión. Las colecciones se crean automáticamente cuando se insertan datos.
+The `forms.py` script manages the connection. Collections are created automatically when data is inserted.
 
-### Estructura de Colecciones Principales
-- `participante_individual`: Datos de registro individual.
-- `tareas`: Tareas asignadas/realizadas.
-- `respuestas`: Respuestas a los cuestionarios.
+### Main Collection Structure
+- `participante_individual`: Individual registration data.
+- `tareas`: Assigned/completed tasks.
+- `respuestas`: Questionnaire responses.
+- `participantes_pareja`: Pair registration data.
+- `consentimientos`: Consent forms.
 
-## Ejecución
+## Usage
 
-Para iniciar el bot:
+To start the bot:
 
 ```bash
 python bot.py
 ```
 
-El bot debería iniciar sesión y comenzar a escuchar mensajes. Los logs se guardan en `errors.log` y en la consola.
+The bot should log in and start listening for messages. Logs are saved in `errors.log` and displayed in the console.
